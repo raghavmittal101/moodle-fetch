@@ -2,22 +2,18 @@ import mechanize
 import getpass
 import re
 import os.path
-import urllib2
+from config import PATH
 
-# url for login page of NU moodle
+# url for login page of NU moodle. NOTE: DO NOT CHANGE
 URL_login = 'https://moodle.niituniversity.in/moodle/login/index.php'
 
-# url for page where all current course corresponding to user is present
+# url for page where all current course corresponding to user is present. NOTE: DO NOT CHANGE
 URL_course_list_page = 'https://moodle.niituniversity.in/moodle/my/'
 
 # regex for distinguishing course links from other links. NOTE: DO NOT CHANGE
 REGEX = r"(https|http)(://)(moodle[.]niituniversity[.]in/moodle/course/view[.]php)([?]id=)(\d*)"
 # regex for distinguishing file links from other links. NOTE: DO NOT CHANGE
 REGEX_for_content = r"(https|http)(://)(moodle[.]niituniversity[.]in/moodle/mod/resource/view[.]php)([?]id=)(\d*)"
-
-# Path where you want to download all the files.
-## Format: "/<abcd>"
-PATH = "/nu_stuff/sem5"
 
 # opening browser
 br = mechanize.Browser()
@@ -81,9 +77,6 @@ def main():
     # opening course page because presently we are on main moodle page
     try:
         dict = return_page_dict(URL_course_list_page, REGEX)
-        # result = br.open('https://moodle.niituniversity.in/moodle/mod/resource/view.php?id=24991')
-        # print result.info().headers
-        # print result.geturl()
 
         # iterating through each subject page
         for key in dict:
@@ -91,16 +84,16 @@ def main():
                 print("opening page " + key)
                 br.open(url=dict[key])
 
-                path = 'nu/' + key
+                path = PATH + key
                 if not os._exists(path):
                     os.makedirs(path)
+
                 # dictionary contains all urls from which file will be downloaded
                 (' \n'
                  '                NOTE: NU Moodle use PHP download scripting due to which we cannot download files directly \n'
                  '                form URL present on page\n'
                  '                ')
                 dict2 = return_page_dict(dict[key], REGEX_for_content)
-                #print(dict2)
 
                 # iterating through each download scripted URL
                 for key2 in dict2:
@@ -115,11 +108,6 @@ def main():
                     print("Downloading '" + filename + "'...")
                     br.retrieve(url, filename)
 
-                #for key2 in dict2:
-                    #br.retrieve(dict2[key2], key2 + '.' + os.path.splitext(dict2[key2])[1])
-                    #print(br.title())
-                    #https://moodle.niituniversity.in/moodle/pluginfile.php/37678/mod_resource/content/1/Lecture%231.ppt
-                    #https://moodle.niituniversity.in/moodle/pluginfile.php/37733/mod_resource/content/2/Lect2_lexical_analysis_with_DFA.ppt
             except:
                 print("ERROR while opening '" + key + "' page")
 
